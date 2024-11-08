@@ -17,4 +17,4 @@ def convert_runtime(runtime):
 movies_df['runtime_minutes'] = movies_df['run_time'].apply(convert_runtime)
 
 # function to recommend movies based on user input
-def recommend_movies(genre=None, min_rating=0, max_runtime=999):
+def recommend_movies(genre=None, min_rating=0, max_runtime=999, certificate=None):
