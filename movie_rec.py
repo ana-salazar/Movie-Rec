@@ -1,5 +1,9 @@
 import pandas as pd
 
+class Movie:
+    def __init__(self, rank, name, year, rating, genre, certificate, run_time, tagline):
+        self.rank = rank
+        
 # load the dataset
 file_path = '/mnt/data/IMDB Top 250 Movies.csv'
 movies_df = pd.read_csv(file_path)
