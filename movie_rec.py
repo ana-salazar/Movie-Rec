@@ -1,8 +1,31 @@
 import pandas as pd
 
 class Movie:
+    """
+    class representing a movie by its attributes
+    
+    Attributes:
+    rank(int): the rank of the movie in the movie database
+    name(str): name of the movie
+    year(int): year movie was released
+    rating(float): the IMDB rating (rating of the movie out of 9)
+    genre(str): the genre of the movie
+    certificate(str): the movie rating (PG-13, PG, R, Approved, Not Rated, G, Passed, Unrated, X, 13+, TV-MA)
+    run_time(int): the runtime of the movie
+    tagline(str): the movies tagline
+     
+    """
+    
     def __init__(self, rank, name, year, rating, genre, certificate, run_time, tagline):
         self.rank = rank
+        self.name = name
+        self.year = year
+        self.rating = rating
+        self.genre = genre
+        self.certificate = certificate
+        self.run_time = run_time
+        self.tagline = tagline
+        
         
 # load the dataset
 file_path = '/mnt/data/IMDB Top 250 Movies.csv'
