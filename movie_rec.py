@@ -27,7 +27,18 @@ class Movie:
         self.run_time = run_time
         self.tagline = tagline
         
-        
+    def filters(self, genre, decade, min_rating, certificate):
+        if genre and genre.lower() not in self.genre.lower():
+            return False
+        if decade and (self.year // 10) * 10 != decade:
+            return False
+        if min_rating and self.rating < min_rating:
+            return False
+        if certificate and self.certificate.lower() != certificate.lower():
+            return False
+        return True
+
+   
 # load the dataset
 file_path = '/mnt/data/IMDB Top 250 Movies.csv'
 movies_df = pd.read_csv(file_path)
