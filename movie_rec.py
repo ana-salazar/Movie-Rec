@@ -41,6 +41,21 @@ def convert_runtime(runtime):
             minutes = int(runtime.split('h')[1].strip('m'))
     return hours * 60 + minutes
 
+# create Movie instances from the DataFrame
+movie_list = []
+for _, row in movies_df.iterrows():
+    movie = Movie(
+        rank=row['rank'],
+        name=row['name'],
+        year=row['year'],
+        rating=row['rating'],
+        genre=row['genre'],
+        certificate=row['certificate'],
+        run_time=row['runtime_minutes'],
+        tagline=row['tagline']
+    )
+    movie_list.append(movie)
+
 # apply the conversion
 movies_df['runtime_minutes'] = movies_df['run_time'].apply(convert_runtime)
 
