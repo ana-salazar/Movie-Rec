@@ -21,14 +21,19 @@ class Movie:
             hours = int(self.run_time.split('h')[0])  # get the hours
             if 'm' in self.run_time:
                 minutes = int(self.run_time.split('h')[1].strip('m'))  # get the minutes
+        elif 'm' in self.run_time:
+            minutes = int(self.run_time.split('m')[0].strip())
         return hours * 60 + minutes
         
     def matches_filters(self, genre=None, decade=None, min_rating=None, certificate=None, max_runtime=None):
         """ filters the movie"""
         if genre and genre.lower() not in self.genre.lower():
             return False
-        if decade and (self.year // 10) * 10 != decade:
-            return False
+        if decade:
+            decade_start = decade - (decade % 10)  # e.g. 2000, 2010, 2020...
+            decade_end = decade_start + 10
+            if not (decade_start <= self.year < decade_end):  # Check if year is within the decade range
+                return False
         if min_rating and self.rating < min_rating:
             return False
         if certificate and self.certificate.lower() != certificate.lower():
