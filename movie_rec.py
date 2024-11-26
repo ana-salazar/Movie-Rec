@@ -11,8 +11,20 @@ class Movie:
         self.certificate = certificate
         self.run_time = run_time
         self.tagline = tagline
+    
+    def convert_runtime(self):
+        """
+        Convert the runtime to minutes
+        """
+        hours, minutes = 0, 0
+        if 'h' in self.run_time:
+            hours = int(self.run_time.split('h')[0])  # get the hours
+            if 'm' in self.run_time:
+                minutes = int(self.run_time.split('h')[1].strip('m'))  # get the minutes
+        return hours * 60 + minutes
         
-    def matches_filters(self, genre=None, decade=None, min_rating=None, certificate=None):
+    def matches_filters(self, genre=None, decade=None, min_rating=None, certificate=None, max_runtime=None):
+        """ filters the movie"""
         if genre and genre.lower() not in self.genre.lower():
             return False
         if decade and (self.year // 10) * 10 != decade:
@@ -21,7 +33,19 @@ class Movie:
             return False
         if certificate and self.certificate.lower() != certificate.lower():
             return False
+
+        total_runtime = self.convert_runtime()
+        if max_runtime is not None:  
+            if total_runtime > max_runtime:
+                return False
         return True
+        
+
+    def format_runtime(self):
+        """
+        returns the run time in its original format (ex:'2h 20m')
+        """
+        return self.run_time
 
 class MovieRecommender:
     """
@@ -36,10 +60,7 @@ class MovieRecommender:
         """
         recommendations = []
         for movie in self.movies:
-            if (
-                movie.matches_filters(genre=genre, min_rating=min_rating, certificate=certificate)
-                and movie.run_time <= max_runtime
-            ):
+            if movie.matches_filters(genre=genre, min_rating=min_rating, certificate=certificate, max_runtime=max_runtime):
                 recommendations.append(movie)
         
         if sort_by:
@@ -53,7 +74,7 @@ class MovieRecommender:
         if sort_by == "rating":
             return sorted(recommendations, key=lambda x: x.rating, reverse=True)
         elif sort_by == "runtime":
-            return sorted(recommendations, key=lambda x: x.run_time)
+            return sorted(recommendations, key=lambda x: x.convert_runtime())
         elif sort_by == "year":
             return sorted(recommendations, key=lambda x: x.year, reverse=True)
         else:
@@ -102,25 +123,13 @@ class MovieAnalyzer:
         year_counts = Counter(movie.year for movie in self.movies)
         return dict(sorted(year_counts.items()))
 
-def convert_runtime(runtime):
-    """
-    Convert the runtime from string format (e.g., '2h 22m') to minutes
-    """
-    hours, minutes = 0, 0
-    if 'h' in runtime:
-        hours = int(runtime.split('h')[0])
-        if 'm' in runtime:
-            minutes = int(runtime.split('h')[1].strip('m'))
-    return hours * 60 + minutes
 
 if __name__ == "__main__":
     # Load the dataset
     file_path = '/mnt/data/IMDB Top 250 Movies.csv'
     movies_df = pd.read_csv(file_path)
 
-    # Apply runtime conversion
-    movies_df['runtime_minutes'] = movies_df['run_time'].apply(convert_runtime)
-
+   
     # Create Movie instances from the DataFrame
     movie_list = [
         Movie(
@@ -130,8 +139,9 @@ if __name__ == "__main__":
             rating=row['rating'],
             genre=row['genre'],
             certificate=row['certificate'],
-            run_time=row['runtime_minutes'],
+            run_time=row['run_time'],  # original runtime string - not in minutes for conversion yet
             tagline=row['tagline']
         )
         for _, row in movies_df.iterrows()
     ]
+    
