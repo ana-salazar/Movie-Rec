@@ -211,17 +211,52 @@ if __name__ == "__main__":
 
    
     # Create Movie instances from the DataFrame
-    movie_list = [
-        Movie(
-            rank=row['rank'],
-            name=row['name'],
-            year=row['year'],
-            rating=row['rating'],
-            genre=row['genre'],
-            certificate=row['certificate'],
-            run_time=row['run_time'],  # original runtime string - not in minutes for conversion yet
-            tagline=row['tagline']
-        )
-        for _, row in movies_df.iterrows()
+   movie_list = [
+    Movie(
+        rank=row['rank'],
+        name=row['name'],
+        year=row['year'],
+        rating=row['rating'],
+        genre=row['genre'],
+        certificate=row['certificate'],
+        runtime=row['run_time'],  # original runtime string - not in minutes for conversion yet
+        tagline=row['tagline']
+    )
+    for _, row in movies_df.iterrows()
+]
+def recommend_movies(genre=None, min_rating=0, max_runtime=999, certificate=None): # Filter and recommend movies
+     """
+    Filters and recommends movies based on the given criteria.
+
+    Args:
+        genre (str, optional): The preferred movie genre. If None, no genre filtering is applied.
+        min_rating (float, optional): The minimum IMDb rating a movie must have to be included.
+                                       Defaults to 0.
+        max_runtime (int, optional): The maximum runtime (in minutes) a movie can have to be included.
+                                      Defaults to 999 (effectively no limit).
+        certificate (str, optional): The desired movie rating (e.g., 'PG', 'R'). If None, no filtering by certificate is applied.
+
+    Returns:
+        list: A list of Movie objects that match the filtering criteria, sorted by rating in descending order.
+    """
+    filtered_movies = [
+        movie for movie in movie_list
+        if (genre is None or genre.lower() in movie.genre.lower())
+        and (certificate is None or certificate.lower() == movie.certificate.lower())
+        and movie.rating >= min_rating
+        and movie.runtime <= max_runtime
     ]
+    return sorted(filtered_movies, key=lambda m: m.rating, reverse=True)
+
+def display_recommendations(recommendations): # Display recommendations
+     """
+    Displays a list of recommended movies in a readable format.
+
+    Args:
+        recommendations (list): A list of Movie objects that meet the filter criteria.
+    """
+    for movie in recommendations:
+        print(movie)
     
+ print("\nRecommended Movies:")
+    display_recommendations(recommendations)
