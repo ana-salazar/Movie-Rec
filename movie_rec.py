@@ -9,10 +9,11 @@ class MovieDatabase:
         self.cursor = self.conn.cursor()
         self.movie_table()
         self.add_movies() #add the top movies  
+    
     def movie_table(self):
         self.cursor.execute( 
         """
-        CREATE TABLE movies (
+        CREATE TABLE IF NOT EXISTS movies (
         rank INTEGER PRIMARY KEY, name TEXT, year INTEGER, 
         rating REAL, genre TEXT, certificate TEXT, run_time TEXT, tagline TEXT,
         budget INTEGER, box_office INTEGER, casts TEXT, directors TEXT, writers TEXT 
@@ -26,8 +27,7 @@ class MovieDatabase:
         self.conn.execute("""
         INSERT INTO movies (rank, name, year, rating, genre, certificate, run_time, tagline, budget, box_office, casts, directors, writers)
         VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)                                    
-        """,      
-        (movie['rank'], movie['name'], movie['year'], movie['rating'], movie['genre'], movie['certificate'], movie['run_time'], movie['tagline'], movie['budget'], movie['box_office'], movie['casts'], movie['directors'], movie['writers'])
+        """, movie      
         )
     
         self.conn.commit()
@@ -35,16 +35,32 @@ class MovieDatabase:
         
     def add_movies(self):
         with open(self.movie_csv, 'r', encoding = 'utf-8') as f:
-        
+            reader = csv.DictReader(f)
+            for row in reader: 
+                movie = (
+                int(row['rank']),
+                row['name'],    
+                int(row["year"]),    
+                float(row["rating"]),
+                row["genre"],
+                row["certificate"],
+                row["run_time"],
+                row["tagline"],
+                int(row["budget"]),
+                int(row["box_office"]),
+                row["casts"],
+                row["directors"],
+                row["writers"]    
+                    
+                )
+            self.insert_movie(movie)
     
-        
     
-
 class Movie:
     """
     Class representing a movie by its attributes
     """
-    def __init__(self, rank, name, year, rating, genre, certificate, run_time, tagline):
+    def __init__(self, rank, name, year, rating, genre, certificate, run_time, tagline, budget, box_office, casts, directors, writers):
         self.rank = rank
         self.name = name
         self.year = year
@@ -53,6 +69,11 @@ class Movie:
         self.certificate = certificate
         self.run_time = run_time
         self.tagline = tagline
+        self.budget = budget
+        self.box_office = box_office
+        self.casts = casts
+        self.directors = directors
+        self.writers = writers
     
     def convert_runtime(self):
         """
@@ -67,24 +88,37 @@ class Movie:
             minutes = int(self.run_time.split('m')[0].strip())
         return hours * 60 + minutes
         
-    def matches_filters(self, genre=None, decade=None, min_rating=None, certificate=None, max_runtime=None):
+    def matches_filters(self, rank=None, genre=None, decade=None, min_rating=None, certificate=None, max_runtime=None, casts=None, directors=None):
         """ filters the movie"""
+        
+        if rank and self.rank != rank:
+            return False
+        
         if genre and genre.lower() not in self.genre.lower():
             return False
+        
         if decade:
             decade_start = decade - (decade % 10)  # e.g. 2000, 2010, 2020...
             decade_end = decade_start + 10
             if not (decade_start <= self.year < decade_end):  # Check if year is within the decade range
                 return False
-        if min_rating and self.rating < min_rating:
-            return False
+        
         if certificate and self.certificate.lower() != certificate.lower():
+            return False
+        
+        if min_rating and self.rating < min_rating:
             return False
 
         total_runtime = self.convert_runtime()
         if max_runtime is not None:  
             if total_runtime > max_runtime:
                 return False
+        if casts and casts.lower() not in self.casts.lower():
+            return False
+        
+        if directors and directors.lower() not in self.directors.lower():
+            return False
+        
         return True
         
 
@@ -101,13 +135,13 @@ class MovieRecommender:
     def __init__(self, movie_list):
         self.movies = movie_list
 
-    def recommend_movies(self, genre=None, min_rating=0, max_runtime=999, certificate=None, sort_by=None):
+    def recommend_movies(self, rank=None, genre=None, decade=None, min_rating=None, certificate=None, max_runtime=None, casts=None, directors=None, sort_by=None):
         """
         Recommend movies based on filters and optionally sort the results.
         """
         recommendations = []
         for movie in self.movies:
-            if movie.matches_filters(genre=genre, min_rating=min_rating, certificate=certificate, max_runtime=max_runtime):
+            if movie.matches_filters(genre=genre, min_rating=min_rating, certificate=certificate, max_runtime=max_runtime, casts=casts, directors=directors):
                 recommendations.append(movie)
         
         if sort_by:
@@ -173,8 +207,7 @@ class MovieAnalyzer:
 
 if __name__ == "__main__":
     # Load the dataset
-    file_path = 'IMDB Top 250 Movies.csv'
-    movies_df = pd.read_csv(file_path)
+    movie_db = MovieDatabase()
 
    
     # Create Movie instances from the DataFrame
