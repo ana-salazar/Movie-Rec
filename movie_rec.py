@@ -1,3 +1,45 @@
+import sqlite3
+import csv
+
+class MovieDatabase:
+    def __init__(self, movie_csv= 'IMDB Top 250 Movies.csv', db = 'topmovies.db'):
+        self.movie_csv = movie_csv
+        self.db = db
+        self.conn = sqlite3.connect(self.db)
+        self.cursor = self.conn.cursor()
+        self.movie_table()
+        self.add_movies() #add the top movies  
+    def movie_table(self):
+        self.cursor.execute( 
+        """
+        CREATE TABLE movies (
+        rank INTEGER PRIMARY KEY, name TEXT, year INTEGER, 
+        rating REAL, genre TEXT, certificate TEXT, run_time TEXT, tagline TEXT,
+        budget INTEGER, box_office INTEGER, casts TEXT, directors TEXT, writers TEXT 
+                  
+        )
+        
+        """)     
+        self.conn.commit()
+    
+    def insert_movie(self,movie):
+        self.conn.execute("""
+        INSERT INTO movies (rank, name, year, rating, genre, certificate, run_time, tagline, budget, box_office, casts, directors, writers)
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)                                    
+        """,      
+        (movie['rank'], movie['name'], movie['year'], movie['rating'], movie['genre'], movie['certificate'], movie['run_time'], movie['tagline'], movie['budget'], movie['box_office'], movie['casts'], movie['directors'], movie['writers'])
+        )
+    
+        self.conn.commit()
+        
+        
+    def add_movies(self):
+        with open(self.movie_csv, 'r', encoding = 'utf-8') as f:
+        
+    
+        
+    
+
 class Movie:
     """
     Class representing a movie by its attributes
@@ -131,7 +173,7 @@ class MovieAnalyzer:
 
 if __name__ == "__main__":
     # Load the dataset
-    file_path = '/mnt/data/IMDB Top 250 Movies.csv'
+    file_path = 'IMDB Top 250 Movies.csv'
     movies_df = pd.read_csv(file_path)
 
    
