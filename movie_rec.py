@@ -1,6 +1,6 @@
 import sqlite3
 import csv
-
+from collections import Counter
 class MovieDatabase:
     def __init__(self, movie_csv= 'IMDB Top 250 Movies.csv', db = 'topmovies.db'):
         self.movie_csv = movie_csv
@@ -24,12 +24,10 @@ class MovieDatabase:
         self.conn.commit()
     
     def insert_movie(self,movie):
-        self.conn.execute("""
+        self.cursor.execute("""
         INSERT INTO movies (rank, name, year, rating, genre, certificate, run_time, tagline, budget, box_office, casts, directors, writers)
         VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)                                    
-        """, movie      
-        )
-    
+        """, movie)
         self.conn.commit()
         
         
@@ -53,9 +51,10 @@ class MovieDatabase:
                 row["writers"]    
                     
                 )
-            self.insert_movie(movie)
+                self.insert_movie(movie)
     
-    
+        self.conn.commit()
+
 class Movie:
     """
     Class representing a movie by its attributes
@@ -67,7 +66,7 @@ class Movie:
         self.rating = rating
         self.genre = genre
         self.certificate = certificate
-        self.run_time = run_time
+        self.run_time = run_time #time looks like 2h 20m
         self.tagline = tagline
         self.budget = budget
         self.box_office = box_office
@@ -84,11 +83,26 @@ class Movie:
             hours = int(self.run_time.split('h')[0])  # get the hours
             if 'm' in self.run_time:
                 minutes = int(self.run_time.split('h')[1].strip('m'))  # get the minutes
+            else:
+                minutes = 0
         elif 'm' in self.run_time:
             minutes = int(self.run_time.split('m')[0].strip())
         return hours * 60 + minutes
         
-    def matches_filters(self, rank=None, genre=None, decade=None, min_rating=None, certificate=None, max_runtime=None, casts=None, directors=None):
+    def format_runtime(self):
+        """
+        returns the run time in its original format (ex:'2h 20m')
+        """
+        total_mins = self.convert_runtime()
+        hours = total_mins // 60
+        minutes = total_mins % 60
+    
+        if hours > 0 and minutes > 0:
+            return f'{hours}h {minutes}m'
+        if hours > 0 and minutes == 0:
+            return f"{hours}"    
+        
+    def matches_filters(self, rank=None, genre=None, decade=None, min_rating=None, year=None,certificate=None, max_runtime=None, casts=None, directors=None):
         """ filters the movie"""
         
         if rank and self.rank != rank:
@@ -102,6 +116,9 @@ class Movie:
             decade_end = decade_start + 10
             if not (decade_start <= self.year < decade_end):  # Check if year is within the decade range
                 return False
+        if year:
+            if self.year != year:
+                return False
         
         if certificate and self.certificate.lower() != certificate.lower():
             return False
@@ -113,6 +130,7 @@ class Movie:
         if max_runtime is not None:  
             if total_runtime > max_runtime:
                 return False
+            
         if casts and casts.lower() not in self.casts.lower():
             return False
         
@@ -121,12 +139,6 @@ class Movie:
         
         return True
         
-
-    def format_runtime(self):
-        """
-        returns the run time in its original format (ex:'2h 20m')
-        """
-        return self.run_time
 
 class MovieRecommender:
     """
@@ -207,21 +219,17 @@ class MovieAnalyzer:
 
 if __name__ == "__main__":
     # Load the dataset
-    movie_db = MovieDatabase()
+    movie_db = MovieDatabase() #initialize movie database
 
    
     # Create Movie instances from the DataFrame
-    movie_list = [
-        Movie(
-            rank=row['rank'],
-            name=row['name'],
-            year=row['year'],
-            rating=row['rating'],
-            genre=row['genre'],
-            certificate=row['certificate'],
-            run_time=row['run_time'],  # original runtime string - not in minutes for conversion yet
-            tagline=row['tagline']
-        )
-        for _, row in movies_df.iterrows()
-    ]
+    movie_list = []
+    cursor = movie_db.conn.cursor()
+    cursor.execute("SELECT * FROM movies")
+    rows = cursor.fetchall()
+    for row in rows:
+        movie_list.append(Movie(*row)) #using * to get everything in the row
     
+    #create instance of MovieRecommender
+    recommender = MovieRecommender(movie_list)
+    recommendations = recommender.recommend_movies(min_rating= 9, genre = "Action")
