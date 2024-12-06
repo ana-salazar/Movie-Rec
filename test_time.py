@@ -1,24 +1,21 @@
 import unittest
-from movie_rec import convert_runtime
 
-class TestConvertRuntime(unittest.TestCase):
+class TestMovieRuntimeConversion(unittest.TestCase):
     def test_convert_runtime(self):
-        """
-        Test the runtime conversion function with various formats.
-        """
-        # test full runtime format (hours and minutes)
-        self.assertEqual(convert_runtime("2h 30m"), 150, "Should convert '2h 30m' to 150 minutes")
-        self.assertEqual(convert_runtime("1h 45m"), 105, "Should convert '1h 45m' to 105 minutes")
-        
-        # test runtime with only hours
-        self.assertEqual(convert_runtime("3h"), 180, "Should convert '3h' to 180 minutes")
-        
-        # test runtime with only minutes
-        self.assertEqual(convert_runtime("45m"), 45, "Should convert '45m' to 45 minutes")
-        
-        # test edge cases (empty string, invalid formats)
-        self.assertEqual(convert_runtime(""), 0, "Should return 0 for an empty string")
-        self.assertEqual(convert_runtime("invalid"), 0, "Should return 0 for invalid format")
+        # Define test cases as (runtime_string, expected_minutes)
+        test_cases = [
+            ("2h 30m", 150),  # 2h 30m = 150 mins
+            ("1h", 60),       # 1h = 60 mins
+            ("45m", 45),      # 45m = 45 mins
+            ("Unknown", 0),   # Invalid format = 0 mins
+            ("3h 15m", 195),  # 3h 15m = 195 mins
+            ("2h 0m", 120),   # 2h 0m = 120 mins
+        ]
+
+        for runtime, expected in test_cases:
+            with self.subTest(runtime=runtime, expected=expected):
+                movie = Movie(1, "Test Movie", 2021, 8.5, "Action", "PG-13", runtime, "A test movie.", 100000, 200000, "Actor A", "Director A", "Writer A")
+                self.assertEqual(movie.convert_runtime(), expected)
 
 if __name__ == "__main__":
     unittest.main()
