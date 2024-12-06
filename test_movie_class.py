@@ -10,6 +10,26 @@ class TestMovieFilters(unittest.TestCase):
         self.movie = Movie(rank = 3, name="The Dark Knight", year=2008, rating=9.0, genre="Action,Crime,Drama", certificate="PG-13", run_time="2h 32m", tagline = "Why So Serious?", budget =185000000, box_office = 1006234167, casts = "Christian Bale, Heath Ledger", directors = "Christopher Nolan", writers = "Jonathan Nolan, Christopher Nolan, David S. Goyer")
         self.recommender = MovieRecommender(self.movie)
         
+    def test_movie_initialization(self):
+        """
+        Test that the Movie class initializes attributes properly.
+        """
+        # Check each attribute
+        self.assertEqual(self.movie.rank, 3)
+        self.assertEqual(self.movie.name, "The Dark Knight")
+        self.assertEqual(self.movie.year, 2008)
+        self.assertEqual(self.movie.rating, 9.0)
+        self.assertEqual(self.movie.genre, "Action,Crime,Drama")
+        self.assertEqual(self.movie.certificate, "PG-13")
+        self.assertEqual(self.movie.run_time, "2h 32m")
+        self.assertEqual(self.movie.tagline, "Why So Serious?")
+        self.assertEqual(self.movie.budget, 185000000)
+        self.assertEqual(self.movie.box_office, 1006234167)
+        self.assertEqual(self.movie.casts,"Christian Bale, Heath Ledger")
+        self.assertEqual(self.movie.directors, "Christopher Nolan")
+        self.assertEqual(self.movie.writers, "Jonathan Nolan, Christopher Nolan, David S. Goyer")
+
+    
     def test_convert_runtime(self):
         self.assertEqual(self.movie.convert_runtime(), 152, "Runtime isnt converted to 152 minutes")
     
