@@ -117,6 +117,8 @@ class Movie:
             if not (decade_start <= self.year < decade_end):  # Check if year is within the decade range
                 return False
         if year:
+            if isinstance(year, str):
+                year = int(year)
             if self.year != year:
                 return False
         
