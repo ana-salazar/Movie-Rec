@@ -1,4 +1,7 @@
 import unittest
+import sqlite3
+import csv
+from movie_rec import Movie
 
 class TestMovieRuntimeConversion(unittest.TestCase):
     def test_convert_runtime(self):
