@@ -1,4 +1,4 @@
-#this is paul i dont know if you guys can see this.
+
 
 import sqlite3
 import csv
