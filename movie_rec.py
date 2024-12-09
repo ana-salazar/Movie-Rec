@@ -1,5 +1,3 @@
-
-
 import sqlite3
 import csv
 from collections import Counter
@@ -17,8 +15,8 @@ class MovieDatabase:
         """
         CREATE TABLE IF NOT EXISTS movies (
         rank INTEGER PRIMARY KEY, name TEXT, year INTEGER, 
-        rating REAL, genre TEXT, certificate TEXT, run_time TEXT, tagline TEXT,
-        budget INTEGER, box_office INTEGER, casts TEXT, directors TEXT, writers TEXT 
+        rating REAL, genre TEXT, certificate TEXT, run_time TEXT, tagline TEXT
+        , casts TEXT, directors TEXT, writers TEXT 
                   
         )
         
@@ -27,8 +25,8 @@ class MovieDatabase:
     
     def insert_movie(self,movie):
         self.cursor.execute("""
-        INSERT INTO movies (rank, name, year, rating, genre, certificate, run_time, tagline, budget, box_office, casts, directors, writers)
-        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)                                    
+        INSERT OR IGNORE INTO movies (rank, name, year, rating, genre, certificate, run_time, tagline, casts, directors, writers)
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)                                    
         """, movie)
         self.conn.commit()
         
@@ -46,8 +44,6 @@ class MovieDatabase:
                 row["certificate"],
                 row["run_time"],
                 row["tagline"],
-                int(row["budget"]),
-                int(row["box_office"]),
                 row["casts"],
                 row["directors"],
                 row["writers"]    
