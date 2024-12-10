@@ -57,7 +57,7 @@ class Movie:
     """
     Class representing a movie by its attributes
     """
-    def __init__(self, rank, name, year, rating, genre, certificate, run_time, tagline, budget, box_office, casts, directors, writers):
+    def __init__(self, rank, name, year, rating, genre, certificate, run_time, tagline, casts, directors, writers):
         self.rank = rank
         self.name = name
         self.year = year
@@ -66,8 +66,6 @@ class Movie:
         self.certificate = certificate
         self.run_time = run_time #time looks like 2h 20m
         self.tagline = tagline
-        self.budget = budget
-        self.box_office = box_office
         self.casts = casts
         self.directors = directors
         self.writers = writers
